@@ -10,9 +10,9 @@ const CARS = [
 
 // 2. LIFF APP IDs (Replace these with your actual LIFF IDs once created in LINE Developer Console)
 const LIFF_IDS = {
-  fuel: 'YOUR_LIFF_ID_FOR_FUEL',             // e.g. 2001234567-aBcDeFgH
-  maintenance: 'YOUR_LIFF_ID_FOR_MAINTENANCE', 
-  history: 'YOUR_LIFF_ID_FOR_HISTORY'
+  fuel: '2010486446-X0yj8FUH',             
+  maintenance: '2010486446-vdtoyrHt', 
+  history: '2010486446-QZGGJYTL'
 };
 
 // 3. GLOBAL STATE

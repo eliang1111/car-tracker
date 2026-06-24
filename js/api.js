@@ -37,7 +37,13 @@ async function apiRequest(action, method = 'GET', data = null) {
     };
     
     if (method === 'GET') {
-      const params = new URLSearchParams(action);
+      const cleanAction = {};
+      for (const key in action) {
+        if (action[key] !== undefined && action[key] !== null && action[key] !== 'undefined' && action[key] !== 'null' && action[key] !== '') {
+          cleanAction[key] = action[key];
+        }
+      }
+      const params = new URLSearchParams(cleanAction);
       url = `${API_URL}?${params.toString()}`;
     } else {
       options.body = JSON.stringify(action); // Post requests send action and data wrapped in body
