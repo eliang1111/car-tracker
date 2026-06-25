@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>บันทึกซ่อมบำรุง - Car Tracker</title>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header>
+    <div class="header-title-container">
+      <div class="header-title">
+        <i class="fa-solid fa-wrench" style="color: var(--color-blue);"></i>
+        <span id="page-heading">บันทึกซ่อมบำรุง</span>
+      </div>
+      <div class="user-badge">
+        <i class="fa-solid fa-circle-notch fa-spin"></i>
+      </div>
+    </div>
+    
+    <!-- Car Toggle Switch -->
+    <div class="car-toggle-container"></div>
+  </header>
+
+  <!-- Main Content Container -->
+  <div class="container">
+    
+    <form id="maintenance-form" class="card">
+      <div class="card-title">
+        <i class="fa-solid fa-file-invoice-dollar" style="color: var(--color-blue);"></i>
+        <span>กรอกข้อมูลซ่อมบำรุง</span>
+      </div>
+      
+      <!-- Date and Time Row -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">วันที่</label>
+          <div class="input-container">
+            <i class="fa-solid fa-calendar input-icon"></i>
+            <input type="date" id="date" class="form-input" required>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">เวลา</label>
+          <div class="input-container">
+            <i class="fa-solid fa-clock input-icon"></i>
+            <input type="time" id="time" class="form-input" required>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Odometer Input -->
+      <div class="form-group">
+        <label class="form-label">เลขไมล์ปัจจุบัน (กม.)</label>
+        <div class="input-container">
+          <i class="fa-solid fa-gauge input-icon"></i>
+          <input type="number" id="odometer_km" class="form-input" placeholder="" required min="0" step="1">
+        </div>
+        <span class="form-subtext" id="odometer-hint">กรอกเลขกิโลเมตรบนหน้าปัด</span>
+      </div>
+      
+      <!-- Shop Name Input -->
+      <div class="form-group">
+        <label class="form-label">สถานที่ (ชื่อร้าน / อู่)</label>
+        <div class="input-container">
+          <i class="fa-solid fa-store input-icon"></i>
+          <input type="text" id="shop_name" class="form-input" placeholder="" required>
+        </div>
+      </div>
+      
+      <!-- Dynamic Selected Services Section -->
+      <div class="services-section">
+        <label class="form-label">รายการบริการและอะไหล่</label>
+        
+        <!-- Target container for selected service rows -->
+        <div id="selected-services-container">
+          <!-- Dynamically populated rows will go here -->
+        </div>
+        
+        <button type="button" class="add-service-btn" id="btn-open-selector">
+          <i class="fa-solid fa-plus-circle"></i>
+          <span>+ ชนิดการบริการ</span>
+        </button>
+      </div>
+      
+      <!-- Notes Textarea -->
+      <div class="form-group mt-4">
+        <label class="form-label">หมายเหตุ / รายละเอียดเพิ่ม</label>
+        <div class="input-container">
+          <textarea id="notes" class="form-input" placeholder=""></textarea>
+        </div>
+      </div>
+      
+      <!-- Auto Calculated Total Summary -->
+      <div class="summary-container">
+        <span class="summary-label">ค่าใช้จ่ายทั้งหมด:</span>
+        <span class="summary-value" id="total_cost_text">฿0.00</span>
+      </div>
+      
+      <!-- Submit Button -->
+      <button type="submit" class="btn btn-blue mt-4" id="submit-btn">
+        <i class="fa-solid fa-check"></i>
+        <span id="btn-text">บันทึกข้อมูล</span>
+      </button>
+      
+      <!-- Delete Button (Only visible in Edit Mode) -->
+      <button type="button" class="btn btn-danger-outline" id="delete-btn" style="display: none;">
+        <i class="fa-solid fa-trash"></i>
+        <span>ลบรายการนี้</span>
+      </button>
+    </form>
+    
+  </div>
+
+  <!-- SERVICE SELECTOR PANEL (Slide-up full screen) -->
+  <div class="service-selector-panel" id="selector-panel">
+    <div class="panel-header">
+      <button type="button" class="header-action" id="btn-close-selector">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+      <div class="panel-header-title">ชนิดการบริการทั้งหมด</div>
+    </div>
+    
+    <!-- Search Bar inside Panel -->
+    <div class="panel-search-bar">
+      <div class="input-container">
+        <i class="fa-solid fa-search input-icon"></i>
+        <input type="text" id="selector-search" class="form-input" placeholder="ค้นหาชนิดบริการ...">
+      </div>
+    </div>
+    
+    <!-- Service Options List Container -->
+    <div class="panel-body">
+      <div class="service-select-list" id="selector-options-list">
+        <!-- Render service categories dynamically -->
+      </div>
+    </div>
+    
+    <!-- Floating Action Button to add a new custom service type option -->
+    <button type="button" class="fab-btn" id="btn-create-custom-service">
+      <i class="fa-solid fa-plus"></i>
+    </button>
+  </div>
+
+  <!-- LINE LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  
+  <!-- App JS & API Script -->
+  <script src="js/app.js"></script>
+  <script src="js/api.js"></script>
+  
+  <script>
+    let editId = null;
+    let selectedServices = []; // State: Array of { service_name, cost }
+    let dbServiceTypes = [];   // Cached list of available services from sheets
+    
+    // Initialize App Core
+    window.addEventListener('load', () => {
+      initApp('maintenance', onReady);
+    });
+    
+    async function onReady() {
+      // 1. Set default date and time
+      document.getElementById('date').value = getTodayDateString();
+      document.getElementById('time').value = getCurrentTimeString();
+      
+      // 2. Load latest odometer from history as a helper hint
+      updateOdometerHint();
+      
+      // 3. Bind UI Panel Events
+      document.getElementById('btn-open-selector').addEventListener('click', openSelectorPanel);
+      document.getElementById('btn-close-selector').addEventListener('click', closeSelectorPanel);
+      document.getElementById('selector-search').addEventListener('input', filterSelectorOptions);
+      document.getElementById('btn-create-custom-service').addEventListener('click', handleCreateCustomService);
+      
+      // 4. Check for Edit Mode (?id=MT-XXX)
+      editId = getUrlParam('id');
+      if (editId) {
+        setupEditMode();
+      }
+      
+      // 5. Handle Form Submission
+      const form = document.getElementById('maintenance-form');
+      form.addEventListener('submit', handleFormSubmit);
+    }
+    
+    /**
+     * Load latest odometer from database
+     */
+    async function updateOdometerHint() {
+      try {
+        const records = await getMaintenanceRecords(activeCar.id);
+        if (records && records.length > 0) {
+          records.sort((a, b) => b.odometer_km - a.odometer_km);
+          const lastOdo = records[0].odometer_km;
+          document.getElementById('odometer-hint').textContent = `เลขไมล์ล่าสุดที่บันทึก: ${lastOdo.toLocaleString()} กม.`;
+        } else {
+          document.getElementById('odometer-hint').textContent = `กรอกตัวเลขสะสมบนหน้าปัด`;
+        }
+        document.getElementById('odometer_km').min = 0; // Only enforce positive numbers, allowing backdated entries
+      } catch (err) {
+        console.error('Failed to load odometer hint:', err);
+      }
+    }
+    
+    /**
+     * Render the table/list of selected services in form
+     */
+    function renderSelectedServices() {
+      const container = document.getElementById('selected-services-container');
+      if (selectedServices.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 12px 0;">
+            ยังไม่มีการเลือกรายการบริการ (กดปุ่มด้านล่างเพื่อเพิ่ม)
+          </div>
+        `;
+        document.getElementById('total_cost_text').textContent = formatCurrency(0);
+        return;
+      }
+      
+      container.innerHTML = selectedServices.map((item, index) => `
+        <div class="service-item-row" data-index="${index}">
+          <div class="service-item-name">${item.service_name}</div>
+          <div class="service-item-cost-container">
+            <span class="currency-symbol">฿</span>
+            <input type="number" class="service-item-cost-input" value="${item.cost || ''}" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <button type="button" class="service-item-remove-btn">
+            <i class="fa-solid fa-times"></i>
+          </button>
+        </div>
+      `).join('');
+      
+      // Bind Events to Inputs and Buttons
+      container.querySelectorAll('.service-item-row').forEach(row => {
+        const index = parseInt(row.getAttribute('data-index'));
+        
+        // Price Input Event
+        const costInput = row.querySelector('.service-item-cost-input');
+        costInput.addEventListener('input', function() {
+          selectedServices[index].cost = parseFloat(this.value) || 0;
+          calculateTotalCost();
+        });
+        
+        // Remove button Event
+        const removeBtn = row.querySelector('.service-item-remove-btn');
+        removeBtn.addEventListener('click', function() {
+          selectedServices.splice(index, 1);
+          renderSelectedServices();
+        });
+      });
+      
+      calculateTotalCost();
+    }
+    
+    function calculateTotalCost() {
+      const total = selectedServices.reduce((sum, item) => sum + (item.cost || 0), 0);
+      document.getElementById('total_cost_text').textContent = formatCurrency(total);
+      return total;
+    }
+    
+    // ==========================================
+    // SELECTOR PANEL CONTROL
+    // ==========================================
+    
+    async function openSelectorPanel() {
+      showLoading('กำลังโหลดรายการบริการ...');
+      try {
+        dbServiceTypes = await getServiceTypes();
+        renderSelectorOptions();
+        document.getElementById('selector-panel').classList.add('active');
+        document.getElementById('selector-search').value = '';
+      } catch (err) {
+        console.error(err);
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    function closeSelectorPanel() {
+      document.getElementById('selector-panel').classList.remove('active');
+    }
+    
+    function renderSelectorOptions(filterText = '') {
+      const listContainer = document.getElementById('selector-options-list');
+      
+      // Filter types: remove ones already selected and search match
+      const filtered = dbServiceTypes.filter(type => {
+        const alreadySelected = selectedServices.some(item => item.service_name === type);
+        if (alreadySelected) return false;
+        
+        if (!filterText) return true;
+        return type.toLowerCase().includes(filterText.toLowerCase());
+      });
+      
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `
+          <div style="text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 30px 10px;">
+            ไม่พบคะแนนตัวเลือกที่เหมาะสม
+          </div>
+        `;
+        return;
+      }
+      
+      listContainer.innerHTML = filtered.map(type => `
+        <div class="service-select-item" data-name="${type}">
+          <span>${type}</span>
+          <div class="service-select-item-delete" title="ลบออกจากระบบ">
+            <i class="fa-solid fa-trash-can"></i>
+          </div>
+        </div>
+      `).join('');
+      
+      // Add click listeners to choices
+      listContainer.querySelectorAll('.service-select-item').forEach(item => {
+        const name = item.getAttribute('data-name');
+        
+        // Click on item selects it
+        item.addEventListener('click', function(e) {
+          // If click was on the trash delete icon, delete from sheet instead
+          if (e.target.closest('.service-select-item-delete')) {
+            e.stopPropagation();
+            handleDeleteServiceOption(name);
+            return;
+          }
+          
+          selectedServices.push({ service_name: name, cost: 0 });
+          renderSelectedServices();
+          closeSelectorPanel();
+        });
+      });
+    }
+    
+    function filterSelectorOptions() {
+      const text = this.value;
+      renderSelectorOptions(text);
+    }
+    
+    /**
+     * Add a custom service option dynamically
+     */
+    async function handleCreateCustomService() {
+      const name = prompt('กรอกชื่อชนิดบริการใหม่:');
+      if (!name || !name.trim()) return;
+      
+      const cleanName = name.trim();
+      
+      // Check if already in the list
+      if (dbServiceTypes.includes(cleanName)) {
+        alert('ชื่อบริการนี้มีอยู่ในระบบแล้ว');
+        return;
+      }
+      
+      showLoading('กำลังเพิ่มข้อมูล...');
+      try {
+        await addServiceType(cleanName);
+        dbServiceTypes.push(cleanName);
+        renderSelectorOptions(document.getElementById('selector-search').value);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    /**
+     * Soft delete a service type option
+     */
+    async function handleDeleteServiceOption(name) {
+      if (!confirm(`คุณแน่ใจว่าต้องการลบตัวเลือก "${name}" ออกจากระบบ?`)) return;
+      
+      showLoading('กำลังลบตัวเลือก...');
+      try {
+        await deleteServiceType(name);
+        dbServiceTypes = dbServiceTypes.filter(t => t !== name);
+        renderSelectorOptions(document.getElementById('selector-search').value);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    // ==========================================
+    // EDIT MODE & FORM SUBMIT
+    // ==========================================
+    
+    async function setupEditMode() {
+      showLoading('กำลังดึงข้อมูล...');
+      
+      document.getElementById('page-heading').textContent = 'แก้ไขประวัติซ่อมบำรุง';
+      document.getElementById('btn-text').textContent = 'บันทึกการแก้ไข';
+      document.getElementById('delete-btn').style.display = 'flex';
+      
+      try {
+        const records = await getMaintenanceRecords();
+        const record = records.find(r => r.record_id === editId);
+        
+        if (record) {
+          // Set active car to record car
+          const car = CARS.find(c => c.id === Number(record.car_id));
+          if (car && car.id !== activeCar.id) {
+            activeCar = car;
+            localStorage.setItem('car_tracker_active_car', car.id);
+            renderCarToggle(null);
+          }
+          
+          // Fill main details
+          let dateVal = record.date;
+          if (dateVal.includes('T')) dateVal = dateVal.split('T')[0];
+          const dObj = new Date(dateVal);
+          if (!isNaN(dObj.getTime())) {
+            const y = dObj.getFullYear();
+            const m = String(dObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dObj.getDate()).padStart(2, '0');
+            dateVal = `${y}-${m}-${d}`;
+          }
+          document.getElementById('date').value = dateVal;
+          document.getElementById('time').value = record.time || '12:00';
+          document.getElementById('odometer_km').value = record.odometer_km;
+          document.getElementById('shop_name').value = record.shop_name;
+          document.getElementById('notes').value = record.notes || '';
+          
+          // Get item details
+          const items = await getMaintenanceItems(editId);
+          selectedServices = items.map(item => ({
+            service_name: item.service_name,
+            cost: parseFloat(item.cost) || 0
+          }));
+          
+          renderSelectedServices();
+          
+          // Disable car toggle
+          document.querySelectorAll('.car-toggle-btn').forEach(btn => btn.disabled = true);
+        } else {
+          alert('ไม่พบประวัติซ่อมบำรุงรายการนี้');
+          window.location.href = 'history.html';
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        hideLoading();
+      }
+      
+      // Bind delete button
+      document.getElementById('delete-btn').addEventListener('click', handleDeleteClick);
+    }
+    
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      
+      if (selectedServices.length === 0) {
+        alert('กรุณาเลือกรายการบริการและอะไหล่อย่างน้อย 1 รายการ');
+        return;
+      }
+      
+      const total = calculateTotalCost();
+      
+      const formData = {
+        user_name: currentUser.displayName,
+        car_id: activeCar.id,
+        date: document.getElementById('date').value,
+        time: document.getElementById('time').value,
+        odometer_km: parseInt(document.getElementById('odometer_km').value),
+        shop_name: document.getElementById('shop_name').value,
+        notes: document.getElementById('notes').value,
+        total_cost: total,
+        items: selectedServices
+      };
+      
+      showLoading('กำลังบันทึกข้อมูล...');
+      try {
+        if (editId) {
+          await updateMaintenanceRecord(editId, formData);
+        } else {
+          await saveMaintenanceRecord(formData);
+        }
+        
+        // Redirect: Go back to history if edited, reload clean page if new entry
+        if (editId) {
+          window.location.href = 'history.html';
+        } else {
+          window.location.href = 'maintenance.html';
+        }
+      } catch (err) {
+        console.error('Save failed:', err);
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    async function handleDeleteClick() {
+      if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบประวัติการซ่อมบำรุงนี้? ข้อมูลย่อยและราคาทั้งหมดจะหายไปด้วย')) return;
+      
+      showLoading('กำลังลบข้อมูล...');
+      try {
+        await deleteRecord('maintenance', editId);
+        window.location.href = 'history.html';
+      } catch (err) {
+        console.error(err);
+      } finally {
+        hideLoading();
+      }
+    }
+  </script>
+</body>
+</html>

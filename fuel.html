@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>บันทึกเติมน้ำมัน - Car Tracker</title>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header>
+    <div class="header-title-container">
+      <div class="header-title">
+        <i class="fa-solid fa-gas-pump" style="color: var(--color-gold);"></i>
+        <span id="page-heading">เติมน้ำมัน</span>
+      </div>
+      <div class="user-badge">
+        <i class="fa-solid fa-circle-notch fa-spin"></i>
+      </div>
+    </div>
+    
+    <!-- Car Toggle Switch -->
+    <div class="car-toggle-container"></div>
+  </header>
+
+  <!-- Main Content Container -->
+  <div class="container">
+    
+    <form id="fuel-form" class="card">
+      <div class="card-title">
+        <i class="fa-solid fa-pen-to-square" style="color: var(--color-gold);"></i>
+        <span>กรอกข้อมูลเติมน้ำมัน</span>
+      </div>
+      
+      <!-- Date and Time Row -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">วันที่</label>
+          <div class="input-container">
+            <i class="fa-solid fa-calendar input-icon"></i>
+            <input type="date" id="date" class="form-input" required>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">เวลา</label>
+          <div class="input-container">
+            <i class="fa-solid fa-clock input-icon"></i>
+            <input type="time" id="time" class="form-input" required>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Odometer Miles Input -->
+      <div class="form-group">
+        <label class="form-label">เลขไมล์ปัจจุบัน (กม.)</label>
+        <div class="input-container">
+          <i class="fa-solid fa-gauge input-icon"></i>
+          <input type="number" id="odometer_km" class="form-input" placeholder="" required min="0" step="1">
+        </div>
+        <span class="form-subtext" id="odometer-hint">กรอกตัวเลขสะสมบนหน้าปัด</span>
+      </div>
+      
+      <!-- Fuel Type Selection -->
+      <div class="form-group">
+        <label class="form-label">ประเภทน้ำมัน</label>
+        <div class="input-container">
+          <i class="fa-solid fa-oil-can input-icon"></i>
+          <select id="fuel_type" class="form-input" required>
+            <option value="" disabled selected>-- เลือกประเภทน้ำมัน --</option>
+            <option value="95">แก๊สโซฮอล์ 95</option>
+            <option value="91">แก๊สโซฮอล์ 91</option>
+            <option value="E20">แก๊สโซฮอล์ E20</option>
+            <option value="E85">แก๊สโซฮอล์ E85</option>
+            <option value="Diesel">ดีเซล (Diesel)</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Total Cost & Price per Liter Row -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">จำนวนเงินที่จ่าย (บาท)</label>
+          <div class="input-container">
+            <i class="fa-solid fa-money-bill-wave input-icon"></i>
+            <input type="number" id="total_cost" class="form-input" placeholder="" required min="0" step="0.01">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">ราคาต่อลิตร (บาท)</label>
+          <div class="input-container">
+            <i class="fa-solid fa-tag input-icon"></i>
+            <input type="number" id="price_per_liter" class="form-input" placeholder="" required min="0" step="0.01">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Calculated Liters -->
+      <div class="form-group">
+        <label class="form-label">จำนวนลิตรที่ได้รับ (คำนวณอัตโนมัติ)</label>
+        <div class="input-container">
+          <i class="fa-solid fa-tint input-icon"></i>
+          <input type="number" id="liters" class="form-input" readonly placeholder="จะคำนวณจากยอดจ่ายและราคาลิตร" style="opacity: 0.85; background-color: rgba(255,255,255,0.03);">
+        </div>
+      </div>
+      
+      <!-- Gas Station Name -->
+      <div class="form-group">
+        <label class="form-label">สถานี/ปั๊มน้ำมัน</label>
+        <div class="input-container">
+          <i class="fa-solid fa-map-marker-alt input-icon"></i>
+          <input type="text" id="station" class="form-input" placeholder="">
+        </div>
+      </div>
+      
+      <!-- Auto Calculated Summary Row -->
+      <div class="summary-container">
+        <span class="summary-label">รวมค่าใช้จ่าย:</span>
+        <span class="summary-value" id="total_cost_text">฿0.00</span>
+      </div>
+      
+      <!-- Submit Button -->
+      <button type="submit" class="btn btn-gold mt-4" id="submit-btn">
+        <i class="fa-solid fa-check"></i>
+        <span id="btn-text">บันทึกข้อมูล</span>
+      </button>
+      
+      <!-- Delete Button (Only visible in Edit Mode) -->
+      <button type="button" class="btn btn-danger-outline" id="delete-btn" style="display: none;">
+        <i class="fa-solid fa-trash"></i>
+        <span>ลบรายการนี้</span>
+      </button>
+    </form>
+    
+  </div>
+
+  <!-- LINE LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  
+  <!-- App JS & API Script -->
+  <script src="js/app.js"></script>
+  <script src="js/api.js"></script>
+  
+  <script>
+    let editId = null;
+    
+    // Initialize LIFF and app utilities
+    window.addEventListener('load', () => {
+      initApp('fuel', onReady);
+    });
+    
+    async function onReady() {
+      // 1. Set default date and time
+      document.getElementById('date').value = getTodayDateString();
+      document.getElementById('time').value = getCurrentTimeString();
+      
+      // 2. Add input listeners for Auto Calculations (Total Cost / Price/Liter = Liters)
+      const totalInput = document.getElementById('total_cost');
+      const priceInput = document.getElementById('price_per_liter');
+      const litersInput = document.getElementById('liters');
+      
+      const calculateLiters = () => {
+        const total = parseFloat(totalInput.value) || 0;
+        const price = parseFloat(priceInput.value) || 0;
+        
+        // Show Total in summary text
+        document.getElementById('total_cost_text').textContent = formatCurrency(total);
+        
+        if (price > 0) {
+          const liters = total / price;
+          litersInput.value = liters.toFixed(4); // 4 decimal places for precision
+          return liters;
+        } else {
+          litersInput.value = '';
+          return 0;
+        }
+      };
+      
+      totalInput.addEventListener('input', calculateLiters);
+      priceInput.addEventListener('input', calculateLiters);
+      
+      // 3. Load latest odometer from history as a helper hint
+      updateOdometerHint();
+      
+      // 4. Check for Edit Mode (?id=FL-XXX)
+      editId = getUrlParam('id');
+      if (editId) {
+        setupEditMode();
+      }
+      
+      // 5. Handle Form Submission
+      const form = document.getElementById('fuel-form');
+      form.addEventListener('submit', handleFormSubmit);
+    }
+    
+    /**
+     * Update the odometer placeholder hint with the last saved reading
+     */
+    async function updateOdometerHint() {
+      try {
+        const records = await getFuelRecords(activeCar.id);
+        if (records && records.length > 0) {
+          // Sort by odometer descending
+          records.sort((a, b) => b.odometer_km - a.odometer_km);
+          const lastOdo = records[0].odometer_km;
+          document.getElementById('odometer-hint').textContent = `เลขไมล์ล่าสุดที่บันทึก: ${lastOdo.toLocaleString()} กม.`;
+        } else {
+          document.getElementById('odometer-hint').textContent = `กรอกตัวเลขสะสมบนหน้าปัด`;
+        }
+        document.getElementById('odometer_km').min = 0; // Only enforce positive numbers, allowing backdated entries
+      } catch (err) {
+        console.error('Failed to load odometer hint:', err);
+      }
+    }
+    
+    /**
+     * Put form into Edit Mode: load existing values
+     */
+    async function setupEditMode() {
+      showLoading('กำลังดึงข้อมูล...');
+      
+      document.getElementById('page-heading').textContent = 'แก้ไขประวัติเติมน้ำมัน';
+      document.getElementById('btn-text').textContent = 'บันทึกการแก้ไข';
+      document.getElementById('delete-btn').style.display = 'flex';
+      
+      try {
+        const records = await getFuelRecords();
+        const record = records.find(r => r.record_id === editId);
+        
+        if (record) {
+          // Set active car to the car of the record
+          const car = CARS.find(c => c.id === Number(record.car_id));
+          if (car && car.id !== activeCar.id) {
+            activeCar = car;
+            localStorage.setItem('car_tracker_active_car', car.id);
+            // Re-render car toggle
+            renderCarToggle(null);
+          }
+          
+          // Fill form values
+          // Dates in Sheets might be formatted, let's extract YYYY-MM-DD
+          let dateVal = record.date;
+          if (dateVal.includes('T')) dateVal = dateVal.split('T')[0];
+          
+          // If date is in other format, parse it
+          const dObj = new Date(dateVal);
+          if (!isNaN(dObj.getTime())) {
+            const y = dObj.getFullYear();
+            const m = String(dObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dObj.getDate()).padStart(2, '0');
+            dateVal = `${y}-${m}-${d}`;
+          }
+          
+          document.getElementById('date').value = dateVal;
+          
+          // Times: extract if exists or default
+          let timeVal = getCurrentTimeString();
+          if (record.timestamp && record.timestamp.includes('T')) {
+            const timePart = record.timestamp.split('T')[1];
+            timeVal = timePart.substring(0, 5);
+          }
+          document.getElementById('time').value = timeVal;
+          
+          document.getElementById('odometer_km').value = record.odometer_km;
+          document.getElementById('fuel_type').value = record.fuel_type;
+          document.getElementById('total_cost').value = record.total_cost;
+          document.getElementById('price_per_liter').value = record.price_per_liter;
+          document.getElementById('liters').value = record.liters;
+          document.getElementById('station').value = record.station;
+          
+          // Calculate and show total
+          const total = parseFloat(record.total_cost) || 0;
+          document.getElementById('total_cost_text').textContent = formatCurrency(total);
+          
+          // Disable car toggle buttons during edit mode to prevent changing car IDs accidentally
+          document.querySelectorAll('.car-toggle-btn').forEach(btn => btn.disabled = true);
+        } else {
+          alert('ไม่พบข้อมูลเติมน้ำมันรายการนี้');
+          window.location.href = 'history.html';
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        hideLoading();
+      }
+      
+      // Bind delete button click
+      document.getElementById('delete-btn').addEventListener('click', handleDeleteClick);
+    }
+    
+    /**
+     * Submit Form handler
+     */
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      
+      const total = parseFloat(document.getElementById('total_cost').value);
+      const price = parseFloat(document.getElementById('price_per_liter').value);
+      const liters = parseFloat(document.getElementById('liters').value) || 0;
+      
+      const formData = {
+        user_name: currentUser.displayName,
+        car_id: activeCar.id,
+        date: document.getElementById('date').value,
+        odometer_km: parseInt(document.getElementById('odometer_km').value),
+        fuel_type: document.getElementById('fuel_type').value,
+        liters: liters,
+        price_per_liter: price,
+        total_cost: total,
+        station: document.getElementById('station').value
+      };
+      
+      showLoading('กำลังบันทึกข้อมูล...');
+      
+      try {
+        if (editId) {
+          await updateFuelRecord(editId, formData);
+        } else {
+          await saveFuelRecord(formData);
+        }
+        
+        // Redirect: Go back to history if edited, reload clean page if new entry
+        if (editId) {
+          window.location.href = 'history.html';
+        } else {
+          window.location.href = 'fuel.html';
+        }
+      } catch (err) {
+        console.error('Save failed:', err);
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    /**
+     * Delete Record handler
+     */
+    async function handleDeleteClick() {
+      if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการเติมน้ำมันนี้?')) return;
+      
+      showLoading('กำลังลบข้อมูล...');
+      try {
+        await deleteRecord('fuel', editId);
+        window.location.href = 'history.html';
+      } catch (err) {
+        console.error(err);
+      } finally {
+        hideLoading();
+      }
+    }
+  </script>
+</body>
+</html>
