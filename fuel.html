@@ -111,12 +111,30 @@
         </div>
       </div>
       
-      <!-- Gas Station Name -->
-      <div class="form-group">
-        <label class="form-label">สถานี/ปั๊มน้ำมัน</label>
-        <div class="input-container">
-          <i class="fa-solid fa-map-marker-alt input-icon"></i>
-          <input type="text" id="station" class="form-input" placeholder="">
+      <!-- Gas Station Brand + Branch -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">แบรนด์ปั๊ม</label>
+          <div class="input-container">
+            <i class="fa-solid fa-gas-pump input-icon"></i>
+            <select id="station_brand" class="form-input">
+              <option value="ปตท.">ปตท.</option>
+              <option value="บางจาก">บางจาก</option>
+              <option value="PT">PT</option>
+              <option value="Shell">Shell</option>
+              <option value="Caltex">Caltex</option>
+              <option value="เอสโซ่">เอสโซ่</option>
+              <option value="อื่นๆ">อื่นๆ</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">สาขา <span style="color: var(--text-muted); font-weight: 400;">(ถ้ามี)</span></label>
+          <div class="input-container">
+            <i class="fa-solid fa-map-marker-alt input-icon"></i>
+            <input type="text" id="station_branch" class="form-input" placeholder="เช่น สุขาภิบาล 2">
+          </div>
         </div>
       </div>
       
@@ -273,7 +291,7 @@
           document.getElementById('total_cost').value = record.total_cost;
           document.getElementById('price_per_liter').value = record.price_per_liter;
           document.getElementById('liters').value = record.liters;
-          document.getElementById('station').value = record.station;
+          parseStationString(record.station || '');
           
           // Calculate and show total
           const total = parseFloat(record.total_cost) || 0;
@@ -314,7 +332,7 @@
         liters: liters,
         price_per_liter: price,
         total_cost: total,
-        station: document.getElementById('station').value
+        station: buildStationString()
       };
       
       showLoading('กำลังบันทึกข้อมูล...');
@@ -339,6 +357,37 @@
       }
     }
     
+    function buildStationString() {
+      const brand  = document.getElementById('station_brand').value;
+      const branch = document.getElementById('station_branch').value.trim();
+      if (brand === 'อื่นๆ') return branch;
+      return branch ? `${brand} ${branch}` : brand;
+    }
+
+    function parseStationString(station) {
+      const brandMap = [
+        { value: 'ปตท.',    keywords: ['ptt', 'ปตท'] },
+        { value: 'บางจาก',  keywords: ['bangchak', 'บางจาก'] },
+        { value: 'PT',      keywords: [' pt ', '^pt$', 'pt '] },
+        { value: 'Shell',   keywords: ['shell'] },
+        { value: 'Caltex',  keywords: ['caltex'] },
+        { value: 'เอสโซ่',  keywords: ['esso', 'เอสโซ่'] },
+      ];
+
+      const lower = station.toLowerCase();
+      const matched = brandMap.find(b => b.keywords.some(k => lower.includes(k.replace('^','').replace('$',''))));
+
+      if (matched) {
+        document.getElementById('station_brand').value = matched.value;
+        // ลบชื่อแบรนด์ออกจากต้น string เพื่อให้เหลือแค่สาขา
+        const afterBrand = station.replace(new RegExp(matched.value, 'i'), '').trim();
+        document.getElementById('station_branch').value = afterBrand;
+      } else {
+        document.getElementById('station_brand').value = 'อื่นๆ';
+        document.getElementById('station_branch').value = station;
+      }
+    }
+
     /**
      * Delete Record handler
      */
