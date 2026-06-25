@@ -43,6 +43,7 @@ async function apiRequest(action, method = 'GET', data = null) {
           cleanAction[key] = action[key];
         }
       }
+      cleanAction['_t'] = new Date().getTime(); // Prevent browser/LINE caching
       const params = new URLSearchParams(cleanAction);
       url = `${API_URL}?${params.toString()}`;
     } else {
