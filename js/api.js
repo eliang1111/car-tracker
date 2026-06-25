@@ -114,6 +114,10 @@ async function getDashboardSummary(carId, month) {
   return await apiRequest({ action: 'getSummary', carId: carId, month: month });
 }
 
+async function getHistoryPageData(carId, month) {
+  return await apiRequest({ action: 'getHistoryPageData', carId: carId, month: month });
+}
+
 // ==========================================
 // MOCK LOCALSTORAGE DATABASE BACKEND
 // ==========================================
@@ -503,6 +507,17 @@ async function mockApiRequest(action, method, postData) {
         average_efficiency: Number(avgEff.toFixed(2)),
         total_maintenance_cost: totalMaintCost,
         chart: chartArr
+      };
+    }
+    
+    case 'getHistoryPageData': {
+      const summary = await mockApiRequest({ action: 'getSummary', carId: params.carId, month: params.month }, 'GET');
+      const fuel = await mockApiRequest({ action: 'getFuel', carId: params.carId }, 'GET');
+      const maintenance = await mockApiRequest({ action: 'getMaintenance', carId: params.carId }, 'GET');
+      return {
+        summary: summary,
+        fuel: fuel,
+        maintenance: maintenance
       };
     }
     
