@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Car Tracker</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Home-specific overrides ── */
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding-bottom: 0;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 48px 24px 24px;
+    }
+
+    .hero-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #1a1a3e 0%, #0d0d22 100%);
+      border: 1px solid rgba(245, 197, 24, 0.25);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 32px rgba(245, 197, 24, 0.12);
+    }
+
+    .hero-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 0%, #a0a0c0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+
+    .hero-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Car Selector */
+    .car-selector {
+      max-width: 420px;
+      margin: 0 auto 32px;
+      padding: 0 16px;
+    }
+
+    .car-selector-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .car-pills {
+      display: flex;
+      gap: 10px;
+    }
+
+    .car-pill {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1.5px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: left;
+    }
+
+    .car-pill.active-car-1 {
+      border-color: rgba(255, 123, 0, 0.5);
+      background: rgba(255, 123, 0, 0.07);
+      box-shadow: 0 4px 20px rgba(255, 123, 0, 0.15);
+    }
+
+    .car-pill.active-car-2 {
+      border-color: rgba(255, 208, 0, 0.5);
+      background: rgba(255, 208, 0, 0.07);
+      box-shadow: 0 4px 20px rgba(255, 208, 0, 0.15);
+    }
+
+    .car-pill-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .car-pill.active-car-1 .car-pill-dot { background: #ff7b00; }
+    .car-pill.active-car-2 .car-pill-dot { background: #ffd000; }
+    .car-pill:not(.active-car-1):not(.active-car-2) .car-pill-dot { background: var(--text-muted); }
+
+    .car-pill-info { flex: 1; }
+    .car-pill-name { font-size: 0.85rem; font-weight: 600; line-height: 1.2; }
+    .car-pill-plate { font-size: 0.7rem; color: var(--text-muted); margin-top: 1px; }
+
+    .car-pill-check {
+      font-size: 0.85rem;
+      opacity: 0;
+      transition: var(--transition);
+    }
+    .car-pill.active-car-1 .car-pill-check { opacity: 1; color: #ff7b00; }
+    .car-pill.active-car-2 .car-pill-check { opacity: 1; color: #ffd000; }
+
+    /* Nav Grid */
+    .nav-grid {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 16px 48px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .nav-grid { grid-template-columns: 1fr; max-width: 420px; }
+    }
+
+    .nav-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: var(--bg-card);
+      border-radius: 20px;
+      padding: 28px 24px;
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 20px 20px 0 0;
+    }
+
+    .nav-card.fuel::before   { background: var(--color-gold-gradient); }
+    .nav-card.maint::before  { background: var(--color-blue-gradient); }
+    .nav-card.history::before { background: var(--color-teal-gradient); }
+
+    .nav-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,0.12);
+    }
+
+    .nav-card.fuel:hover   { box-shadow: 0 16px 40px rgba(245, 197, 24, 0.15); }
+    .nav-card.maint:hover  { box-shadow: 0 16px 40px rgba(74, 144, 217, 0.15); }
+    .nav-card.history:hover { box-shadow: 0 16px 40px rgba(0, 201, 177, 0.15); }
+
+    .nav-card-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 18px;
+    }
+
+    .nav-card.fuel   .nav-card-icon { background: rgba(245,197,24,0.12); color: var(--color-gold); }
+    .nav-card.maint  .nav-card-icon { background: rgba(74,144,217,0.12); color: var(--color-blue); }
+    .nav-card.history .nav-card-icon { background: rgba(0,201,177,0.12); color: var(--color-teal); }
+
+    .nav-card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .nav-card-desc {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .nav-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-card-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
+    }
+
+    .nav-card.fuel   .nav-card-tag { background: rgba(245,197,24,0.12); color: var(--color-gold); }
+    .nav-card.maint  .nav-card-tag { background: rgba(74,144,217,0.12); color: var(--color-blue); }
+    .nav-card.history .nav-card-tag { background: rgba(0,201,177,0.12); color: var(--color-teal); }
+
+    .nav-card-arrow {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+
+    .nav-card:hover .nav-card-arrow { transform: translateX(4px); color: var(--text-secondary); }
+
+    /* Footer */
+    .home-footer {
+      margin-top: auto;
+      text-align: center;
+      padding: 16px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-icon">🚗</div>
+    <div class="hero-title">Car Tracker</div>
+    <div class="hero-subtitle">ติดตามค่าใช้จ่ายรถยนต์ในครอบครัว</div>
+  </div>
+
+  <!-- Car Selector -->
+  <div class="car-selector">
+    <div class="car-selector-label">เลือกรถที่ใช้งาน</div>
+    <div class="car-pills">
+      <div class="car-pill" id="pill-1" onclick="selectCar(1)">
+        <div class="car-pill-dot"></div>
+        <div class="car-pill-info">
+          <div class="car-pill-name">Nissan Almera</div>
+          <div class="car-pill-plate">9กข 70 · 2020 · ส้ม</div>
+        </div>
+        <i class="fa-solid fa-circle-check car-pill-check"></i>
+      </div>
+      <div class="car-pill" id="pill-2" onclick="selectCar(2)">
+        <div class="car-pill-dot"></div>
+        <div class="car-pill-info">
+          <div class="car-pill-name">Honda Jazz</div>
+          <div class="car-pill-plate">3กส 7666 · 2014 · เหลือง</div>
+        </div>
+        <i class="fa-solid fa-circle-check car-pill-check"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav Cards -->
+  <div class="nav-grid">
+
+    <a class="nav-card fuel" id="link-fuel" href="fuel.html">
+      <div class="nav-card-icon">
+        <i class="fa-solid fa-gas-pump"></i>
+      </div>
+      <div class="nav-card-title">เติมน้ำมัน</div>
+      <div class="nav-card-desc">บันทึกการเติมน้ำมันแต่ละครั้ง คำนวณอัตราสิ้นเปลือง (กม./ลิตร) อัตโนมัติ</div>
+      <div class="nav-card-footer">
+        <span class="nav-card-tag">fuel.html</span>
+        <i class="fa-solid fa-arrow-right nav-card-arrow"></i>
+      </div>
+    </a>
+
+    <a class="nav-card maint" id="link-maint" href="maintenance.html">
+      <div class="nav-card-icon">
+        <i class="fa-solid fa-wrench"></i>
+      </div>
+      <div class="nav-card-title">ซ่อมบำรุง</div>
+      <div class="nav-card-desc">บันทึกการซ่อมและเปลี่ยนอะไหล่ รองรับหลายรายการต่อครั้ง</div>
+      <div class="nav-card-footer">
+        <span class="nav-card-tag">maintenance.html</span>
+        <i class="fa-solid fa-arrow-right nav-card-arrow"></i>
+      </div>
+    </a>
+
+    <a class="nav-card history" id="link-history" href="history.html">
+      <div class="nav-card-icon">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+      </div>
+      <div class="nav-card-title">ประวัติ & รายงาน</div>
+      <div class="nav-card-desc">ดูประวัติทั้งหมด สรุปรายเดือน กราฟย้อนหลัง 6 เดือน และส่งรายงานเข้า LINE</div>
+      <div class="nav-card-footer">
+        <span class="nav-card-tag">history.html</span>
+        <i class="fa-solid fa-arrow-right nav-card-arrow"></i>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="home-footer">
+    Car Tracker · Nissan Almera & Honda Jazz · Powered by Google Sheets
+  </div>
+
+  <script>
+    const CARS = [
+      { id: 1, name: 'Nissan Almera' },
+      { id: 2, name: 'Honda Jazz' }
+    ];
+
+    function selectCar(id) {
+      localStorage.setItem('car_tracker_active_car', id);
+      renderPills(id);
+    }
+
+    function renderPills(activeCar) {
+      CARS.forEach(car => {
+        const pill = document.getElementById('pill-' + car.id);
+        pill.className = 'car-pill' + (car.id === activeCar ? ' active-car-' + car.id : '');
+      });
+    }
+
+    // Init: read saved car from localStorage
+    const saved = parseInt(localStorage.getItem('car_tracker_active_car')) || 1;
+    renderPills(saved);
+  </script>
+
+</body>
+</html>
